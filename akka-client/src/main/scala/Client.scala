@@ -10,7 +10,7 @@ import scala.concurrent.Future
    val a = actor(new Act {
       whenStarting {
         val server = system.actorSelection("akka.tcp://Server@"+ root +":2552/user/server")
-       	(1 to 10).par foreach {i=> Future {server ! "msg= " + i + "root-" + root + ":Zeeshan-10.198.81.63:Rupin-10.198.80.73:Priti-10.198.81.132"}(Config.executionContext) } 
+       	(1 to 1000000).par foreach {i=> Future {server ! "msg= " + i + "root" + root + ":Zeeshan-10.198.81.63:Rupin-10.198.80.73:Priti-10.198.81.132"}(Config.executionContext) } 
       }     
    })
 }
