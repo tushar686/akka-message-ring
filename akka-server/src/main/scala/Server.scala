@@ -33,7 +33,8 @@ class Server extends Actor {
   
   def sendMessageBackToRoot(msgList: List[String]) = {
 	 if(!msgList.head.contains("back")) {
-	   val server = Server.system.actorSelection("akka.tcp://Server@10.198.80.147:2552/user/server")
+	   val rootIp = msgList.head.split("root").toList.last
+	   val server = Server.system.actorSelection("akka.tcp://Server@" + rootIp +":2552/user/server")
 	   println("========================sending back to Root for Ring Conpletion")
 	   server ! msgList.head + " back"
 	 }
@@ -44,6 +45,6 @@ class Server extends Actor {
 object Server extends App {
   val system = ActorSystem("Server")
   val server = system.actorOf(Props[Server], name = "server")
-  server ! "Hello"
+  server ! "Test back message"
   println("Server ready")
 }
