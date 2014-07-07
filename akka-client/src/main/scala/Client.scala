@@ -3,26 +3,29 @@ package client
 import akka.actor._
 import akka.actor.ActorDSL._
 import scala.concurrent.Future
+import akka.routing._
 
- object Client_Sender extends App {
-	implicit val system = ActorSystem("Client")
-	val root = "10.198.80.147"
-   val a = actor(new Act {
-      whenStarting {
-        val server = system.actorSelection("akka.tcp://Server@"+ root +":2552/user/server")
-       	(1 to 1000000).par foreach {i=> Future {server ! "msg= " + i + "root" + root + ":Zeeshan-10.198.81.63:Rupin-10.198.80.73:Priti-10.198.81.132"}(Config.executionContext) } 
-      }     
-   })
+class Client_Actor extends Actor {
+   def receive = {
+     case msg: String => 
+   }
 }
 
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
-import scala.concurrent.ExecutionContext
-import scala.concurrent.ExecutionContextExecutorService
 
-object Config extends Config(numberOfthreads = 200)
+object Client {
+  
+   def main(args: Array[String]) {
+	   sendMessages
+   }
 
-class Config(numberOfthreads: Int) {
-  val threadPool:ExecutorService = Executors.newScheduledThreadPool(numberOfthreads)
-  implicit val executionContext: ExecutionContextExecutorService = ExecutionContext.fromExecutorService(threadPool)
+   def sendMessages = {
+	  val root = "10.198.80.147:2551"
+	  val system = ActorSystem("Client")
+	  val client = system.actorOf(Props[Client_Actor], name = "client")
+	  
+	  val server = system.actorSelection("akka.tcp://Server@"+ root +"/user/server")
+	  (1 to 1000000) foreach {i=> server ! "msg = " + i + "root" + root + "" 
+	    									if(i % 5000 == 0) Thread.sleep(1000)
+	    					}
+	}
 }
