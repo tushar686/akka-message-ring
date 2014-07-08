@@ -9,8 +9,8 @@ class Server extends Actor with RequiresMessageQueue[BoundedMessageQueueSemantic
   val IP_DELIMITER = ","
   def receive = {
     case msg: String => total_messages = total_messages + 1
-      					println("\n########################received " + msg)
-      					println("\ntotal= " + total_messages)
+    					println("\ntotal= " + total_messages)
+      					println("########################received " + msg)
       					sendMessageToNextMachineInTheRing(msg)    					
     case _ => println("\nReceived unknown msg")
   }
@@ -40,7 +40,7 @@ class Server extends Actor with RequiresMessageQueue[BoundedMessageQueueSemantic
 	 if(!msgList.head.contains("back")) {
 	   val rootIp = msgList.head.split("root").toList.last
 	   val server = Server.system.actorSelection("akka.tcp://Server@" + rootIp +"/user/server")
-	   println("\n========================sending back to Root for Ring Conpletion")
+	   println("========================sending back to Root for Ring Conpletion")
 	   server ! msgList.head + " back"
 	 }
   }
