@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.dispatch._
 
-class Server extends Actor with RequiresMessageQueue[BoundedMessageQueueSemantics] {
+class ServerWithoutRingInfo extends Actor with RequiresMessageQueue[BoundedMessageQueueSemantics] {
   var total_messages = 0;
   val IP_DELIMITER = ","
   def receive = {
@@ -27,30 +27,30 @@ class Server extends Actor with RequiresMessageQueue[BoundedMessageQueueSemantic
   def sendMessageToNextIp(msgList: List[String]) = {
     val ips = msgList.tail
     println("************************forwarding to " + ips.head)
-	 val server = Server.system.actorSelection("akka.tcp://Server@" + ips.head.split("-")(1) + "/user/server")
+	 val serverWithoutRingInfo = ServerWithoutRingInfo.system.actorSelection("akka.tcp://Server@" + ips.head.split("-")(1) + "/user/serverWithoutRingInfo")
 	 ips match {
 		case _ if ips.size == 1 =>
-		  server ! msgList.head
+		  serverWithoutRingInfo ! msgList.head
 		case _ if ips.size > 1 =>
-		  server ! msgList.head + IP_DELIMITER + ips.tail.mkString(IP_DELIMITER)
+		  serverWithoutRingInfo ! msgList.head + IP_DELIMITER + ips.tail.mkString(IP_DELIMITER)
 	 }
   }
   
   def sendMessageBackToRoot(msgList: List[String]) = {
 	 if(!msgList.head.contains("back")) {
 	   val rootIp = msgList.head.split("root").toList.last
-	   val server = Server.system.actorSelection("akka.tcp://Server@" + rootIp +"/user/server")
+	   val serverWithoutRingInfo = ServerWithoutRingInfo.system.actorSelection("akka.tcp://Server@" + rootIp +"/user/serverWithoutRingInfo")
 	   println("========================sending back to Root for Ring Conpletion")
-	   server ! msgList.head + " back"
+	   serverWithoutRingInfo ! msgList.head + " back"
 	 }
   }
   	
 }
 
 
-object Server extends App {
+object ServerWithoutRingInfo extends App {
   val system = ActorSystem("Server")
-  val server = system.actorOf(Props[Server].withDispatcher("server-dispatcher"), name = "server")
-  server ! "Test back message"
+  val serverWithoutRingInfo = system.actorOf(Props[ServerWithoutRingInfo].withDispatcher("server-dispatcher"), name = "serverWithoutRingInfo")
+  serverWithoutRingInfo ! "Test back message"
   println("Server ready")
 }
